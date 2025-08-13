@@ -6,14 +6,14 @@ from esphome.const import CONF_ID
 DEPENDENCIES = ["uart"]
 
 batterijen_ns = cg.esphome_ns.namespace("batterijen")
-Batterijen = batterijen_ns.class_("Batterijen", cg.Component, uart.UARTDevice)
+BatterijenSensor = batterijen_ns.class_("BatterijenSensor", cg.Component, uart.UARTDevice)
 
 CONF_PACK_ID = "pack_id"
 CONF_CELLS = "cells"
 
 CONFIG_SCHEMA = (
     cv.Schema({
-        cv.GenerateID(): cv.declare_id(Batterijen),
+        cv.GenerateID(): cv.declare_id(BatterijenSensor),
         cv.Required(CONF_PACK_ID): cv.int_,
         cv.Required(CONF_CELLS): cv.ensure_list(sensor.sensor_schema()),
     })

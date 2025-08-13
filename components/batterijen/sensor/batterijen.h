@@ -7,7 +7,7 @@
 namespace esphome {
 namespace batterijen {
 
-class Batterijen : public Component, public uart::UARTDevice {
+class BatterijenSensor : public Component, public uart::UARTDevice {
  public:
   void set_pack_id(uint8_t id) { pack_id_ = id; }
   void set_cell_sensor(size_t index, sensor::Sensor *sens) {
