@@ -1,5 +1,6 @@
 #pragma once
 #include "esphome/core/component.h"
+#include "esphome/core/log.h"  // <-- deze toevoegen
 
 namespace esphome {
 namespace batterijen {
