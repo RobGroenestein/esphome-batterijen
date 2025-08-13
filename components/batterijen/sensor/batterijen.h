@@ -14,6 +14,7 @@ class BatterijenSensor : public Component, public uart::UARTDevice {
     if (index >= cells_.size()) cells_.resize(index + 1, nullptr);
     cells_[index] = sens;
   }
+  void set_soc_sensor(sensor::Sensor *sens) { soc_sensor_ = sens; }
 
   void loop() override {
     while (available() >= 10) {
@@ -23,9 +24,11 @@ class BatterijenSensor : public Component, public uart::UARTDevice {
         if (header[0] == 0x55 && header[1] == 0xAA &&
             header[2] == 0xEB && header[3] == 0x90) {
           uint8_t pid = read();
-          uint8_t reserved = read();
+          read(); // reserved
           if (pid == pack_id_) {
             ESP_LOGI("batterijen", "Frame for pack_id %u", pid);
+
+            // Cellen uitlezen
             for (size_t i = 0; i < cells_.size(); i++) {
               uint8_t low = read();
               uint8_t high = read();
@@ -35,6 +38,17 @@ class BatterijenSensor : public Component, public uart::UARTDevice {
                 cells_[i]->publish_state(volts);
                 ESP_LOGD("batterijen", "Cell %u: %.3f V", (unsigned)i+1, volts);
               }
+            }
+
+            // Pack voltage (2 bytes) & current (2 bytes)
+            read(); read();
+            read(); read();
+
+            // SOC uitlezen (1 byte)
+            uint8_t soc_val = read();
+            if (soc_sensor_ && soc_val <= 100) {
+              soc_sensor_->publish_state(soc_val);
+              ESP_LOGD("batterijen", "SOC: %u %%", soc_val);
             }
           }
         }
@@ -47,6 +61,7 @@ class BatterijenSensor : public Component, public uart::UARTDevice {
  protected:
   uint8_t pack_id_{1};
   std::vector<sensor::Sensor *> cells_;
+  sensor::Sensor *soc_sensor_{nullptr};
 };
 
 }  // namespace batterijen
